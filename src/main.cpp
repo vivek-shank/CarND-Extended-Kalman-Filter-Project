@@ -136,7 +136,10 @@ int main()
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-	  
+	  	
+		  cout << "MEAS TYPE: " << meas_package.sensor_type_ << endl;
+		  cout << "RMSE"  << RMSE << endl;
+
         }
       } else {
         
