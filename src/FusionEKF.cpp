@@ -46,8 +46,8 @@ FusionEKF::FusionEKF() {
 	  0, 0, 0, 1;
 
   ekf_.P_ = MatrixXd(4, 4);
-  ekf_.P_ << 1000, 0, 0, 0,
-	  0, 1000, 0, 0,
+  ekf_.P_ << 1, 0, 0, 0,
+	  0, 1, 0, 0,
 	  0, 0, 1000, 0,
 	  0, 0, 0, 1000;
 
@@ -75,9 +75,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
 
-	//ToDo: Vel must not be 1,1
     ekf_.x_ << 1, 1, 5, 0;
-	//ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -144,7 +142,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	  ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
 	  ekf_.R_ = R_radar_;
 
-	  //ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+	  ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
 	  // Laser updates
 	  ekf_.H_ = H_laser_;

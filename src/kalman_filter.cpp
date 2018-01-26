@@ -1,5 +1,6 @@
 #include "kalman_filter.h"
 #include <iostream>
+#include "math.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -33,9 +34,10 @@ void KalmanFilter::Update(const VectorXd &z) {
 
 	VectorXd y_ = z - H_ * x_;
 	MatrixXd Ht = H_.transpose();
-	MatrixXd S = (H_ * P_ * Ht) + R_;
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd S = (H_ * PHt) + R_;
 	MatrixXd Sinv = S.inverse();
-	MatrixXd K = P_ * Ht * Sinv;
+	MatrixXd K = PHt * Sinv;
 	long x_size = x_.size();
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 
@@ -53,14 +55,13 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	float y = x_[1];
 	float vx = x_[2];
 	float vy = x_[3];
-	const double PI = 3.14159265358979323844;
 
 	float rho = sqrt(x*x + y * y);
 	//ToDo: angle should be (-pi, pi)
 	float theta = atan2(y, x);
 
 	if (fabs(rho) < 0.001) {
-		return;
+		rho = 0.001;
 	}
 
 	float rho_dot = (x * vx + y * vy) / rho;
@@ -71,17 +72,18 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	VectorXd y_ = z - Z_pred;
 	float delta_theta = y_[1];
 	
-	while (delta_theta > PI)
-		delta_theta -= 2*PI;
-	while (delta_theta < -PI)
-		delta_theta += 2*PI;
+	while (delta_theta > M_PI)
+		delta_theta -= 2* M_PI;
+	while (delta_theta < -M_PI)
+		delta_theta += 2* M_PI;
 
 	y_[1] = delta_theta;
 
 	MatrixXd Ht = H_.transpose();
-	MatrixXd S = (H_ * P_ * Ht) + R_;
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd S = (H_ * PHt) + R_;
 	MatrixXd Sinv = S.inverse();
-	MatrixXd K = P_ * Ht * Sinv;
+	MatrixXd K = PHt * Sinv;
 	MatrixXd I = MatrixXd::Identity(4, 4);
 
 	x_ += K * y_;
